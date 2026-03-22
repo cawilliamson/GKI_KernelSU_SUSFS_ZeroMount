@@ -83,15 +83,15 @@ package:
     set -euo pipefail
     mkdir -p out/
     echo "==> locating kernel image..."
-    IMAGE=""
-    for candidate in src/bazel-bin/common/kernel_aarch64/Image src/out/{{ANDROID_VERSION}}-{{KERNEL_VERSION}}/dist/Image; do
-        [[ -f "$candidate" ]] && IMAGE="$candidate" && break
-    done
+    IMAGE=$(find src/ -name "Image" -type f -path "*/kernel_aarch64/*" 2>/dev/null | head -1)
+    if [[ -z "$IMAGE" ]]; then
+        IMAGE=$(find src/ -name "Image" -type f 2>/dev/null | head -1)
+    fi
     if [[ -z "$IMAGE" ]]; then
         echo "FATAL: kernel Image not found"
-        find src/ -name "Image" -type f 2>/dev/null
         exit 1
     fi
+    echo "  -> found: $IMAGE"
     echo "==> preparing anykernel3 package..."
     STAGING="tmp/anykernel3-staging"
     rm -rf "$STAGING"
